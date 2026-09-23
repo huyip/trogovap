@@ -10,6 +10,8 @@ import { districts, rooms as initialRooms } from './data/rooms'
 import { filterRooms, formatPrice, getSimilarRooms } from './utils/room'
 
 const defaultFilters = { query: '', district: 'Gò Vấp', area: '', price: '', size: '', amenities: [] }
+const appBase = import.meta.env.BASE_URL
+const appPath = (path = '') => `${appBase}${path}`
 
 export default function App() {
   const [rooms, setRooms] = useState(() => { try { return JSON.parse(localStorage.getItem('ogovap-rooms')) || initialRooms } catch { return initialRooms } })
@@ -19,9 +21,9 @@ export default function App() {
   useEffect(() => localStorage.setItem('ogovap-rooms', JSON.stringify(rooms)), [rooms])
   useEffect(() => { document.title = selectedRoom ? `${selectedRoom.code} | Ở Gò Vấp` : admin ? 'Quản trị | Ở Gò Vấp' : 'Ở Gò Vấp | Tìm phòng trọ dễ hơn' }, [selectedRoom, admin])
   const filteredRooms = filterRooms(rooms, filters)
-  const openRoom = (room) => { setSelectedRoom(room); window.history.pushState({}, '', `/phong/${room.code}`); window.scrollTo({ top: 0 }) }
-  const backHome = () => { setSelectedRoom(null); setAdmin(false); window.history.pushState({}, '', '/'); window.scrollTo({ top: 0 }) }
-  const goAdmin = () => { setAdmin(true); setSelectedRoom(null); window.history.pushState({}, '', '/admin'); window.scrollTo({ top: 0 }) }
+  const openRoom = (room) => { setSelectedRoom(room); window.history.pushState({}, '', appPath(`phong/${room.code}`)); window.scrollTo({ top: 0 }) }
+  const backHome = () => { setSelectedRoom(null); setAdmin(false); window.history.pushState({}, '', appPath()); window.scrollTo({ top: 0 }) }
+  const goAdmin = () => { setAdmin(true); setSelectedRoom(null); window.history.pushState({}, '', appPath('admin')); window.scrollTo({ top: 0 }) }
   if (admin) return <AdminPage rooms={rooms} setRooms={setRooms} onBack={backHome} />
   if (selectedRoom) return <RoomDetail room={selectedRoom} rooms={rooms} onBack={backHome} onOpen={openRoom} />
   return <Home rooms={filteredRooms} filters={filters} setFilters={setFilters} onOpen={openRoom} onFindRooms={() => document.getElementById('find-rooms')?.scrollIntoView({ behavior: 'smooth' })} onAdmin={goAdmin} />
