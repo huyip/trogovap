@@ -47,6 +47,13 @@ export default function App() {
     [rooms],
   );
   useEffect(() => {
+    const roomCode = window.location.pathname.match(/\/phong\/([^/]+)/)?.[1];
+    if (roomCode) {
+      const room = rooms.find((item) => item.code === roomCode);
+      if (room) setSelectedRoom(room);
+    }
+  }, [rooms]);
+  useEffect(() => {
     document.title = selectedRoom
       ? `${selectedRoom.code} | Ở Gò Vấp`
       : admin
