@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Activity,
   ArrowUpRight,
   Check,
   ChevronRight,
@@ -40,6 +41,7 @@ export default function App() {
   const [filters, setFilters] = useState(defaultFilters);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [admin, setAdmin] = useState(window.location.pathname === "/admin");
+  const [returnScrollY, setReturnScrollY] = useState(0);
   useEffect(
     () => localStorage.setItem("ogovap-rooms", JSON.stringify(rooms)),
     [rooms],
@@ -53,15 +55,17 @@ export default function App() {
   }, [selectedRoom, admin]);
   const filteredRooms = filterRooms(rooms, filters);
   const openRoom = (room) => {
+    setReturnScrollY(window.scrollY);
     setSelectedRoom(room);
     window.history.pushState({}, "", appPath(`phong/${room.code}`));
     window.scrollTo({ top: 0 });
   };
   const backHome = () => {
+    const previousScrollY = returnScrollY;
     setSelectedRoom(null);
     setAdmin(false);
     window.history.pushState({}, "", appPath());
-    window.scrollTo({ top: 0 });
+    window.requestAnimationFrame(() => window.scrollTo({ top: previousScrollY }));
   };
   const goAdmin = () => {
     setAdmin(true);
@@ -251,10 +255,8 @@ function Home({ rooms, filters, setFilters, onOpen, onFindRooms, onAdmin }) {
         <div className="container">
           <div>
             <a className="brand" href="#top">
-              <span className="brand-mark">Ở</span>
-              <span>
-                Gò Vấp<span className="brand-dot">.</span>
-              </span>
+              <span className="brand-mark"><Activity size={19} strokeWidth={2.4} /></span>
+              <span className="brand-name"><span>Nhịp đập</span><strong>Hồ Chí Minh<span className="brand-dot">.</span></strong></span>
             </a>
             <p>
               Phòng trọ tử tế cho một
@@ -269,9 +271,6 @@ function Home({ rooms, filters, setFilters, onOpen, onFindRooms, onAdmin }) {
             <a href={contactConfig.zalo} target="_blank" rel="noreferrer">
               <MessageCircle size={15} /> Zalo tư vấn
             </a>
-            <button onClick={onAdmin}>
-              Khu vực quản trị <ArrowUpRight size={15} />
-            </button>
           </div>
         </div>
       </footer>
