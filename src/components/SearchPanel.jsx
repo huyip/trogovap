@@ -1,4 +1,4 @@
-import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
 import { useState } from 'react'
 import { districts } from '../data/rooms'
 
@@ -8,17 +8,26 @@ const amenities = ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Máy giặt', 'Ban
 
 export default function SearchPanel({ filters, setFilters, count }) {
   const [advanced, setAdvanced] = useState(false)
-  const district = districts.find((item) => item.name === filters.district)
+  const [locationOpen, setLocationOpen] = useState(false)
+  const [locationMode, setLocationMode] = useState('district')
+  const [locationQuery, setLocationQuery] = useState('')
   const update = (key, value) => setFilters((current) => ({ ...current, [key]: value }))
   const clear = () => setFilters({ query: '', district: 'Gò Vấp', area: '', price: '', size: '', amenities: [] })
   const toggleAmenity = (item) => update('amenities', filters.amenities.includes(item) ? filters.amenities.filter((value) => value !== item) : [...filters.amenities, item])
+  const openLocation = (mode) => { setLocationMode(mode); setLocationOpen(true); setLocationQuery('') }
+  const chooseDistrict = (districtName) => { setFilters((current) => ({ ...current, district: districtName, area: '', query: districtName })); setLocationOpen(false); setLocationQuery('') }
+  const chooseArea = (area) => { setFilters((current) => ({ ...current, area, query: area })); setLocationOpen(false); setLocationQuery('') }
+  const selectedDistrict = districts.find((item) => item.name === filters.district) || districts[0]
+  const visibleDistricts = districts.filter((item) => !locationQuery || item.name.toLowerCase().includes(locationQuery.toLowerCase()))
+  const visibleAreas = selectedDistrict.areas.filter((area) => !locationQuery || area.toLowerCase().includes(locationQuery.toLowerCase()))
   return <section className="search-shell" id="find-rooms">
     <div className="search-row">
       <label className="search-input"><Search size={19} /><input value={filters.query} onChange={(event) => update('query', event.target.value)} placeholder="Tìm theo khu vực..." /></label>
-      <label className="select-field"><span>Quận</span><select value={filters.district} onChange={(event) => update('district', event.target.value)}>{districts.map((item) => <option key={item.name}>{item.name}</option>)}</select><ChevronDown size={16} /></label>
-      <label className="select-field area-select"><span>Khu vực</span><select value={filters.area} onChange={(event) => update('area', event.target.value)}><option value="">Tất cả khu vực</option>{(district?.areas || []).map((area) => <option key={area}>{area}</option>)}</select><ChevronDown size={16} /></label>
+      <button className="select-field" type="button" onClick={() => openLocation('district')}><span>Quận</span><strong>{filters.district}</strong><ChevronDown size={16} /></button>
+      <button className="select-field area-select" type="button" onClick={() => openLocation('area')}><span>Khu vực</span><strong>{filters.area || 'Tất cả khu vực'}</strong><ChevronDown size={16} /></button>
       <button className="button button-accent filter-toggle" onClick={() => setAdvanced(!advanced)}><SlidersHorizontal size={17} /> Bộ lọc <span className="filter-count">{filters.amenities.length + Number(Boolean(filters.price)) + Number(Boolean(filters.size))}</span></button>
     </div>
+    {locationOpen && <div className="location-picker"><div className="location-picker-header"><button className="location-back" onClick={() => { setLocationOpen(false); setLocationQuery('') }}><ArrowLeft size={19} /></button><strong>{locationMode === 'district' ? 'Chọn quận' : `Chọn khu vực · ${selectedDistrict.name}`}</strong></div><label className="location-search"><Search size={17} /><input autoFocus value={locationQuery} onChange={(event) => setLocationQuery(event.target.value)} placeholder={locationMode === 'district' ? 'Nhập tên quận' : 'Nhập tên khu vực'} /></label><div className="location-list">{locationMode === 'district' ? visibleDistricts.map((item) => <button className="location-option district-option" key={item.name} onClick={() => chooseDistrict(item.name)}><span>{item.name}</span><small>Quận</small></button>) : <><button className="location-option" onClick={() => { setFilters((current) => ({ ...current, area: '', query: selectedDistrict.name })); setLocationOpen(false); setLocationQuery('') }}><span>Tất cả khu vực</span><small>{selectedDistrict.areas.length} khu vực</small></button>{visibleAreas.map((area) => <button className="location-option" key={area} onClick={() => chooseArea(area)}><span>{area}</span><small>{selectedDistrict.name}</small></button>)}</>}{((locationMode === 'district' && !visibleDistricts.length) || (locationMode === 'area' && !visibleAreas.length)) && <p className="location-empty">Không tìm thấy khu vực phù hợp.</p>}</div></div>}
     {advanced && <div className="advanced-filters">
       <FilterGroup title="Mức giá" options={prices} value={filters.price} onChange={(value) => update('price', value)} />
       <FilterGroup title="Diện tích" options={sizes} value={filters.size} onChange={(value) => update('size', value)} />

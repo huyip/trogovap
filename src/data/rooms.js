@@ -5,9 +5,7 @@ export const districts = [
     name: 'Gò Vấp',
     areas: ['Dương Quảng Hàm', 'Nguyễn Văn Lượng', 'Lê Đức Thọ', 'Phan Văn Trị', 'Quang Trung', 'Nguyễn Oanh', 'Khu Đại học Công nghiệp', 'Khu Emart', 'Các khu vực khác'],
   },
-  { name: 'Bình Thạnh', areas: ['Xô Viết Nghệ Tĩnh', 'Phan Văn Hân'] },
-  { name: 'Tân Bình', areas: ['Cộng Hòa', 'Hoàng Văn Thụ'] },
-  { name: 'Phú Nhuận', areas: ['Phan Đăng Lưu', 'Huỳnh Văn Bánh'] },
+  { name: 'Quận 12', areas: ['Hà Huy Giáp', 'Nguyễn Ảnh Thủ', 'Lê Văn Khương', 'Tân Chánh Hiệp', 'Thạnh Lộc', 'Hiệp Thành', 'Trung Mỹ Tây'] },
 ]
 
 export const rooms = [
