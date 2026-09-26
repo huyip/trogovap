@@ -7,8 +7,10 @@ import {
   Heart,
   MessageCircle,
   Phone,
+  Share2,
   Send,
   Sparkles,
+  X,
 } from "lucide-react";
 import Header from "./components/Header";
 import RoomCard from "./components/RoomCard";
@@ -17,7 +19,7 @@ import SearchPanel from "./components/SearchPanel";
 import AdminPage from "./components/AdminPage";
 import { contactConfig } from "./config/contact";
 import { districts, rooms as initialRooms } from "./data/rooms";
-import { filterRooms, formatPrice, getSimilarRooms } from "./utils/room";
+import { filterRooms, formatPrice, getSimilarRooms, sortRooms } from "./utils/room";
 
 const defaultFilters = {
   query: "",
@@ -26,6 +28,7 @@ const defaultFilters = {
   price: "",
   size: "",
   amenities: [],
+  availableNow: false,
 };
 const appBase = import.meta.env.BASE_URL;
 const appPath = (path = "") => `${appBase}${path}`;
@@ -39,6 +42,9 @@ export default function App() {
     }
   });
   const [filters, setFilters] = useState(defaultFilters);
+  const [sortBy, setSortBy] = useState("newest");
+  const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem("ogovap-favorites") || "[]"));
+  const [compareIds, setCompareIds] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [admin, setAdmin] = useState(window.location.pathname === "/admin");
   const [returnScrollY, setReturnScrollY] = useState(0);
@@ -46,6 +52,7 @@ export default function App() {
     () => localStorage.setItem("ogovap-rooms", JSON.stringify(rooms)),
     [rooms],
   );
+  useEffect(() => localStorage.setItem("ogovap-favorites", JSON.stringify(favorites)), [favorites]);
   useEffect(() => {
     const roomCode = window.location.pathname.match(/\/phong\/([^/]+)/)?.[1];
     if (roomCode) {
@@ -60,7 +67,15 @@ export default function App() {
         ? "Quản trị | Ở Gò Vấp"
         : "Ở Gò Vấp | Tìm phòng trọ dễ hơn";
   }, [selectedRoom, admin]);
-  const filteredRooms = filterRooms(rooms, filters);
+  const filteredRooms = sortRooms(filterRooms(rooms, filters), sortBy);
+  const toggleFavorite = (id) => setFavorites((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const toggleCompare = (room) => setCompareIds((current) => current.includes(room.id) ? current.filter((id) => id !== room.id) : current.length >= 3 ? current : [...current, room.id]);
+  const compareRooms = rooms.filter((room) => compareIds.includes(room.id));
+  const shareRoom = async (room) => {
+    const url = window.location.href;
+    if (navigator.share) await navigator.share({ title: room.title, text: `${room.title} · ${formatPrice(room.price)}/tháng`, url });
+    else await navigator.clipboard?.writeText(url);
+  };
   const openRoom = (room) => {
     setReturnScrollY(window.scrollY);
     setSelectedRoom(room);
@@ -83,12 +98,20 @@ export default function App() {
   if (admin)
     return <AdminPage rooms={rooms} setRooms={setRooms} onBack={backHome} />;
   if (selectedRoom)
-    return <RoomDetail room={selectedRoom} rooms={rooms} onBack={backHome} onOpen={openRoom} />;
+    return <RoomDetail room={selectedRoom} rooms={rooms} onBack={backHome} onOpen={openRoom} isFavorite={favorites.includes(selectedRoom.id)} onToggleFavorite={toggleFavorite} onShare={shareRoom} />;
   return (
     <Home
       rooms={filteredRooms}
       filters={filters}
       setFilters={setFilters}
+      sortBy={sortBy}
+      setSortBy={setSortBy}
+      favorites={favorites}
+      compareIds={compareIds}
+      compareRooms={compareRooms}
+      onClearCompare={() => setCompareIds([])}
+      onToggleFavorite={toggleFavorite}
+      onToggleCompare={toggleCompare}
       onOpen={openRoom}
       onFindRooms={() =>
         document
@@ -100,7 +123,7 @@ export default function App() {
   );
 }
 
-function Home({ rooms, filters, setFilters, onOpen, onFindRooms, onAdmin }) {
+function Home({ rooms, filters, setFilters, sortBy, setSortBy, favorites, compareIds, compareRooms, onClearCompare, onToggleFavorite, onToggleCompare, onOpen, onFindRooms, onAdmin }) {
   const [areaFocus, setAreaFocus] = useState("Gò Vấp");
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const areas = districts.find((item) => item.name === areaFocus)?.areas || [];
@@ -210,6 +233,8 @@ function Home({ rooms, filters, setFilters, onOpen, onFindRooms, onAdmin }) {
             filters={filters}
             setFilters={setFilters}
             count={rooms.length}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
           />
         </section>
         <section className="rooms-section container" id="rooms">
@@ -230,12 +255,13 @@ function Home({ rooms, filters, setFilters, onOpen, onFindRooms, onAdmin }) {
           {rooms.length ? (
             <div className="room-grid">
               {rooms.map((room) => (
-                <RoomCard key={room.id} room={room} onOpen={onOpen} />
+                <RoomCard key={room.id} room={room} onOpen={onOpen} isFavorite={favorites.includes(room.id)} onToggleFavorite={onToggleFavorite} isCompared={compareIds.includes(room.id)} onToggleCompare={onToggleCompare} />
               ))}
             </div>
           ) : (
             <EmptyState />
           )}
+          {compareRooms.length > 0 && <CompareBar rooms={compareRooms} onClear={onClearCompare} onOpen={onOpen} />}
         </section>
         <section className="contact-band" id="contact">
           <div className="container contact-inner">
@@ -285,6 +311,10 @@ function Home({ rooms, filters, setFilters, onOpen, onFindRooms, onAdmin }) {
   );
 }
 
+function CompareBar({ rooms, onClear, onOpen }) {
+  return <aside className="compare-bar"><div><strong>Đang so sánh {rooms.length}/3 phòng</strong><div className="compare-items">{rooms.map((room) => <button key={room.id} onClick={() => onOpen(room)}>{room.code} · {formatPrice(room.price)}</button>)}</div></div><button className="compare-clear" onClick={onClear}><X size={15} /> Xóa</button></aside>
+}
+
 function EmptyState() {
   return (
     <div className="empty-state">
@@ -328,7 +358,7 @@ function RoomMap({ room }) {
   );
 }
 
-function RoomDetail({ room, rooms, onBack, onOpen }) {
+function RoomDetail({ room, rooms, onBack, onOpen, isFavorite, onToggleFavorite, onShare }) {
   const message = contactConfig.defaultMessage
     .replace("{code}", room.code)
     .replace("{area}", room.area);
@@ -362,6 +392,7 @@ function RoomDetail({ room, rooms, onBack, onOpen }) {
                   {room.status === "upcoming" ? "Sắp trống" : "Đang nhận khách"}
                 </span>
               </div>
+              <div className="detail-actions"><button className={`detail-action ${isFavorite ? 'is-favorite' : ''}`} onClick={() => onToggleFavorite(room.id)}><Heart size={17} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'Đã lưu' : 'Lưu yêu thích'}</button><button className="detail-action" onClick={() => onShare(room)}><Share2 size={17} /> Chia sẻ</button></div>
               <h1>{room.title}</h1>
               <p className="detail-location">
                 {room.area} <span>•</span> {room.district}
@@ -436,7 +467,7 @@ function RoomDetail({ room, rooms, onBack, onOpen }) {
             </div>
             <div className="room-grid">
               {similar.map((item) => (
-                <RoomCard key={item.id} room={item} onOpen={onOpen} />
+                <RoomCard key={item.id} room={item} onOpen={onOpen} isFavorite={false} onToggleFavorite={onToggleFavorite} isCompared={false} onToggleCompare={() => {}} />
               ))}
             </div>
           </section>

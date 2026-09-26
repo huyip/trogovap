@@ -6,13 +6,13 @@ const prices = [['under3', 'Dưới 3 triệu'], ['3to4', '3–4 triệu'], ['4t
 const sizes = [['under20', 'Dưới 20m²'], ['20to30', '20–30m²'], ['30to40', '30–40m²'], ['over40', 'Trên 40m²']]
 const amenities = ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Máy giặt', 'Ban công', 'Cửa sổ', 'Thang máy', 'Giữ xe', 'Giờ giấc tự do', 'Ra vào vân tay']
 
-export default function SearchPanel({ filters, setFilters, count }) {
+export default function SearchPanel({ filters, setFilters, count, sortBy, setSortBy }) {
   const [advanced, setAdvanced] = useState(false)
   const [locationOpen, setLocationOpen] = useState(false)
   const [locationMode, setLocationMode] = useState('district')
   const [locationQuery, setLocationQuery] = useState('')
   const update = (key, value) => setFilters((current) => ({ ...current, [key]: value }))
-  const clear = () => setFilters({ query: '', district: 'Gò Vấp', area: '', price: '', size: '', amenities: [] })
+  const clear = () => setFilters({ query: '', district: 'Gò Vấp', area: '', price: '', size: '', amenities: [], availableNow: false })
   const toggleAmenity = (item) => update('amenities', filters.amenities.includes(item) ? filters.amenities.filter((value) => value !== item) : [...filters.amenities, item])
   const openLocation = (mode) => { setLocationMode(mode); setLocationOpen(true); setLocationQuery('') }
   const chooseDistrict = (districtName) => { setFilters((current) => ({ ...current, district: districtName, area: '', query: districtName })); setLocationOpen(false); setLocationQuery('') }
@@ -31,9 +31,9 @@ export default function SearchPanel({ filters, setFilters, count }) {
     {advanced && <div className="advanced-filters">
       <FilterGroup title="Mức giá" options={prices} value={filters.price} onChange={(value) => update('price', value)} />
       <FilterGroup title="Diện tích" options={sizes} value={filters.size} onChange={(value) => update('size', value)} />
-      <div className="filter-group"><div className="filter-heading">Tiện ích</div><div className="amenity-options">{amenities.map((item) => <button key={item} className={filters.amenities.includes(item) ? 'selected' : ''} onClick={() => toggleAmenity(item)}>{item}</button>)}</div></div>
+      <div className="filter-group"><div className="filter-heading">Tiện ích</div><label className="availability-toggle"><input type="checkbox" checked={filters.availableNow} onChange={(event) => update('availableNow', event.target.checked)} /> Có thể dọn vào ngay</label><div className="amenity-options">{amenities.map((item) => <button key={item} className={filters.amenities.includes(item) ? 'selected' : ''} onClick={() => toggleAmenity(item)}>{item}</button>)}</div></div>
     </div>}
-    <div className="results-bar"><strong>{count} phòng phù hợp</strong><button className="clear-button" onClick={clear}><X size={14} /> Xóa bộ lọc</button></div>
+    <div className="results-bar"><strong>{count} phòng phù hợp</strong><div className="results-actions"><label className="sort-select">Sắp xếp<select value={sortBy} onChange={(event) => setSortBy(event.target.value)}><option value="newest">Mới đăng</option><option value="priceAsc">Giá thấp đến cao</option><option value="priceDesc">Giá cao đến thấp</option><option value="sizeDesc">Diện tích lớn nhất</option></select></label><button className="clear-button" onClick={clear}><X size={14} /> Xóa bộ lọc</button></div></div>
   </section>
 }
 
