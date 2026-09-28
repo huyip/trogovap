@@ -69,7 +69,7 @@ export default function App() {
         }
         return room;
       });
-      return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...updatedSavedRooms];
+      return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...updatedSavedRooms].map((room) => ({ ...room, amenities: [...new Set([...(room.amenities || []), "Máy lạnh"])] }));
     } catch {
       return initialRooms;
     }
