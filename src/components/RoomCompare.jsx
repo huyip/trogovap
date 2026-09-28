@@ -61,13 +61,13 @@ export default function RoomCompare({ rooms, allRooms, onToggle, onClear, onOpen
     </aside>}
     <dialog ref={dialog} className="room-compare-dialog" aria-labelledby="compare-title" onCancel={close}>
       <header className="compare-dialog-heading"><div><p>CHỌN CĂN PHÙ HỢP VỚI BẠN</p><h2 id="compare-title">So sánh phòng</h2></div><button className="icon-button" aria-label="Đóng so sánh" onClick={close}><X /></button></header>
-      <div className="compare-toolbar"><label><input type="checkbox" checked={onlyDifferent} disabled={rooms.length < 2} onChange={event => setOnlyDifferent(event.target.checked)} /> Chỉ xem điểm khác biệt</label><span>{rooms.length}/3 phòng · Vuốt ngang để xem đầy đủ</span></div>
+      <div className="compare-toolbar"><label><input type="checkbox" checked={onlyDifferent} disabled={rooms.length < 2} onChange={event => setOnlyDifferent(event.target.checked)} /> Chỉ xem điểm khác biệt</label><span>{rooms.length}/3 phòng{rooms.length === 3 ? ' · Vuốt ngang để xem đầy đủ' : ''}</span>{rooms.length < 3 && <button className="compare-toolbar-add" onClick={showPicker}><Plus size={16} /> Thêm phòng</button>}</div>
       {picking && rooms.length < 3 && <section className="compare-picker" aria-label="Thêm phòng so sánh">
         <div><input autoFocus aria-label="Tìm phòng để so sánh" placeholder="Tìm tên phòng, mã hoặc khu vực..." value={query} onChange={event => setQuery(event.target.value)} /><button className="icon-button" aria-label="Đóng danh sách thêm phòng" onClick={() => setPicking(false)}><X size={18} /></button></div>
         <div className="compare-picker-list">{candidates.map(room => <button key={room.id} onClick={() => { onToggle(room); setPicking(false) }}><img src={room.images?.[0]} alt="" /><span><strong>{room.title}</strong><small>{room.code} · {formatPrice(room.price)}</small></span><Plus size={18} /></button>)}{!candidates.length && <p>Không tìm thấy phòng phù hợp.</p>}</div>
       </section>}
       <div className="compare-table-scroll">
-        <table className="room-compare-table">
+        <table className="room-compare-table" data-room-count={rooms.length}>
           <caption className="compare-sr-only">So sánh giá thuê, thông tin, chi phí và tiện nghi các phòng đã chọn</caption>
           <thead><tr><th scope="col" className="compare-label"><span>Thông tin so sánh</span><small>Chi phí giữ nguyên đơn vị theo từng phòng.</small></th>
             {rooms.map(room => <th scope="col" key={room.id}><div className="compare-room-summary">
@@ -75,13 +75,13 @@ export default function RoomCompare({ rooms, allRooms, onToggle, onClear, onOpen
               <img src={room.images?.[0]} alt={room.title} /><small>{room.code}</small><h3>{room.title}</h3><strong>{formatPrice(room.price)} <small>/ tháng</small></strong>
               <button className="text-button" onClick={() => { close(); onOpen(room) }}>Xem phòng <ArrowUpRight size={15} /></button>
             </div></th>)}
-            {rooms.length < 3 && <th scope="col"><button className="compare-add" onClick={showPicker}><Plus size={28} /><span>Thêm phòng</span></button></th>}
+
           </tr></thead>
           {groups.filter(group => group.rows.length).map(group => <tbody key={group.title}>
-            <tr className="compare-group"><th colSpan={1 + rooms.length + Number(rooms.length < 3)}>{group.title}</th></tr>
+            <tr className="compare-group"><th colSpan={1 + rooms.length}>{group.title}</th></tr>
             {group.rows.map(row => <tr key={row.label} className={new Set(row.values).size > 1 ? 'compare-different' : ''}><th scope="row">{row.label}</th>
               {row.values.map((value, index) => <td key={rooms[index].id}>{value === 'Có' ? <span className="compare-yes"><Check size={16} /> Có</span> : value}</td>)}
-              {rooms.length < 3 && <td className="compare-empty">—</td>}
+
             </tr>)}
           </tbody>)}
         </table>
