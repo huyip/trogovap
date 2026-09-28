@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import { formatPrice } from '../utils/room'
 
 const blank = { code: '', title: '', district: 'Gò Vấp', area: 'Dương Quảng Hàm', price: '', size: '', description: '', amenities: [], status: 'available', images: [] }
-const allAmenities = ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Máy giặt', 'Ban công', 'Cửa sổ', 'Thang máy', 'Giữ xe', 'Giờ giấc tự do', 'Ra vào vân tay']
+const allAmenities = ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Máy giặt', 'Ban công', 'Cửa sổ', 'Thang máy', 'Giữ xe', 'Hầm xe', 'Có bảo vệ', 'Bàn ghế', 'Kệ bếp', 'Giờ giấc tự do', 'Ra vào vân tay']
 
 export default function AdminPage({ rooms, setRooms, onBack }) {
   const [editing, setEditing] = useState(null)
