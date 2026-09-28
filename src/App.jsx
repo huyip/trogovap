@@ -54,6 +54,10 @@ export default function App() {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, ...currentListing };
         }
+        if (room.code === "LDTHO523") {
+          const currentListing = initialRooms.find((item) => item.code === room.code);
+          return { ...room, ...currentListing };
+        }
         return room;
       });
       return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...updatedSavedRooms];
