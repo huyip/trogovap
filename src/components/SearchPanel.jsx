@@ -4,7 +4,7 @@ import { districts } from '../data/rooms'
 
 const prices = [['under3', 'Dưới 3 triệu'], ['3to4', '3–4 triệu'], ['4to5', '4–5 triệu'], ['5to6', '5–6 triệu'], ['over6', 'Trên 6 triệu']]
 const sizes = [['under20', 'Dưới 20m²'], ['20to30', '20–30m²'], ['30to40', '30–40m²'], ['over40', 'Trên 40m²']]
-const amenities = ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Máy giặt', 'Ban công', 'Cửa sổ', 'Thang máy', 'Giữ xe', 'Hầm xe', 'Có bảo vệ', 'Bàn ghế', 'Kệ bếp', 'Giờ giấc tự do', 'Ra vào vân tay']
+const amenities = ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Máy giặt', 'Ban công', 'Cửa sổ', '2 cửa sổ', 'Thoáng mát', 'Thang máy', 'Giữ xe', 'Gửi xe miễn phí', 'Hầm xe', 'Có bảo vệ', 'Bàn ghế', 'Kệ bếp', 'Giờ giấc tự do', 'Ra vào vân tay']
 
 export default function SearchPanel({ filters, setFilters, count, sortBy, setSortBy }) {
   const [advanced, setAdvanced] = useState(false)
