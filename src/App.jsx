@@ -48,7 +48,7 @@ export default function App() {
         }
         if (room.code === "DQH080") {
           const currentListing = initialRooms.find((item) => item.code === room.code);
-          return { ...room, ...currentListing };
+          return { ...room, title: currentListing.title, images: currentListing.images, video: currentListing.video };
         }
         return room;
       });
