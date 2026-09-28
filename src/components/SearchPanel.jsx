@@ -24,9 +24,8 @@ export default function SearchPanel({ filters, setFilters, count, sortBy, setSor
     : districts.flatMap((district) => district.areas.map((area) => ({ area, district: district.name })))
   const visibleAreas = availableAreas.filter(({ area, district }) => !locationQuery || `${area} ${district}`.toLowerCase().includes(locationQuery.toLowerCase()))
   return <section className="search-shell" id="find-rooms">
-    <div className="search-heading"><strong>Tìm kiếm</strong><span>Nhập tên phòng hoặc khu vực để tìm ngay; không cần mở Bộ lọc.</span></div>
     <div className="search-row">
-      <label className="search-input"><Search size={19} /><input aria-label="Tìm kiếm phòng" value={filters.query} onChange={(event) => update('query', event.target.value)} placeholder="Nhập tên phòng hoặc khu vực..." /></label>
+      <label className="search-input"><Search size={19} /><input aria-label="Tìm kiếm phòng" value={filters.query} onChange={(event) => update('query', event.target.value)} placeholder="Tìm theo khu vực..." /></label>
       <button className="select-field" type="button" onClick={() => openLocation('district')}><span>Quận</span><strong>{filters.district || 'Chọn quận'}</strong><ChevronDown size={16} /></button>
       <button className="select-field area-select" type="button" onClick={() => openLocation('area')}><span>Khu vực</span><strong>{filters.area || 'Chọn khu vực'}</strong><ChevronDown size={16} /></button>
       <button className="button button-accent search-submit" type="button" onClick={() => document.getElementById('rooms')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>TÌM</button>
