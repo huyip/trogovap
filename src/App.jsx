@@ -16,6 +16,7 @@ import Header from "./components/Header";
 import RoomCard from "./components/RoomCard";
 import Gallery from "./components/Gallery";
 import SearchPanel from "./components/SearchPanel";
+import RoomCompare from "./components/RoomCompare";
 import AdminPage from "./components/AdminPage";
 import { contactConfig } from "./config/contact";
 import { districts, rooms as initialRooms } from "./data/rooms";
@@ -133,7 +134,7 @@ export default function App() {
     return <RoomDetail room={selectedRoom} rooms={rooms} onBack={backHome} onOpen={openRoom} isFavorite={favorites.includes(selectedRoom.id)} onToggleFavorite={toggleFavorite} onShare={shareRoom} />;
   return (
     <Home
-      rooms={filteredRooms}
+      rooms={filteredRooms} allRooms={rooms}
       filters={filters}
       setFilters={setFilters}
       sortBy={sortBy}
@@ -155,7 +156,7 @@ export default function App() {
   );
 }
 
-function Home({ rooms, filters, setFilters, sortBy, setSortBy, favorites, compareIds, compareRooms, onClearCompare, onToggleFavorite, onToggleCompare, onOpen, onFindRooms, onAdmin }) {
+function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorites, compareIds, compareRooms, onClearCompare, onToggleFavorite, onToggleCompare, onOpen, onFindRooms, onAdmin }) {
   const [areaFocus, setAreaFocus] = useState("Gò Vấp");
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const areas = districts.find((item) => item.name === areaFocus)?.areas || [];
@@ -293,7 +294,7 @@ function Home({ rooms, filters, setFilters, sortBy, setSortBy, favorites, compar
           ) : (
             <EmptyState />
           )}
-          {compareRooms.length > 0 && <CompareBar rooms={compareRooms} onClear={onClearCompare} onOpen={onOpen} />}
+          <RoomCompare rooms={compareRooms} allRooms={allRooms} onToggle={onToggleCompare} onClear={onClearCompare} onOpen={onOpen} />
         </section>
         <section className="contact-band" id="contact">
           <div className="container contact-inner">
@@ -343,9 +344,6 @@ function Home({ rooms, filters, setFilters, sortBy, setSortBy, favorites, compar
   );
 }
 
-function CompareBar({ rooms, onClear, onOpen }) {
-  return <aside className="compare-bar"><div><strong>Đang so sánh {rooms.length}/3 phòng</strong><div className="compare-items">{rooms.map((room) => <button key={room.id} onClick={() => onOpen(room)}>{room.code} · {formatPrice(room.price)}</button>)}</div></div><button className="compare-clear" onClick={onClear}><X size={15} /> Xóa</button></aside>
-}
 
 function EmptyState() {
   return (
