@@ -21,8 +21,9 @@ export default function SearchPanel({ filters, setFilters, count, sortBy, setSor
   const visibleDistricts = districts.filter((item) => !locationQuery || item.name.toLowerCase().includes(locationQuery.toLowerCase()))
   const visibleAreas = selectedDistrict.areas.filter((area) => !locationQuery || area.toLowerCase().includes(locationQuery.toLowerCase()))
   return <section className="search-shell" id="find-rooms">
+    <div className="search-heading"><strong>Tìm kiếm</strong><span>Nhập tên phòng hoặc khu vực để tìm ngay; không cần mở Bộ lọc.</span></div>
     <div className="search-row">
-      <label className="search-input"><Search size={19} /><span className="search-field-label">Tìm kiếm</span><input aria-label="Tìm kiếm phòng" value={filters.query} onChange={(event) => update('query', event.target.value)} placeholder="Nhập tên phòng hoặc khu vực..." /></label>
+      <label className="search-input"><Search size={19} /><input aria-label="Tìm kiếm phòng" value={filters.query} onChange={(event) => update('query', event.target.value)} placeholder="Nhập tên phòng hoặc khu vực..." /></label>
       <button className="select-field" type="button" onClick={() => openLocation('district')}><span>Quận</span><strong>{filters.district}</strong><ChevronDown size={16} /></button>
       <button className="select-field area-select" type="button" onClick={() => openLocation('area')}><span>Khu vực</span><strong>{filters.area || 'Tất cả khu vực'}</strong><ChevronDown size={16} /></button>
       <button className="button button-accent filter-toggle" onClick={() => setAdvanced(!advanced)}><SlidersHorizontal size={17} /> Bộ lọc <span className="filter-count">{filters.amenities.length + Number(Boolean(filters.price)) + Number(Boolean(filters.size))}</span></button>
