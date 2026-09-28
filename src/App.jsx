@@ -36,7 +36,10 @@ const appPath = (path = "") => `${appBase}${path}`;
 export default function App() {
   const [rooms, setRooms] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("ogovap-rooms")) || initialRooms;
+      const savedRooms = JSON.parse(localStorage.getItem("ogovap-rooms"));
+      if (!Array.isArray(savedRooms)) return initialRooms;
+      const savedIds = new Set(savedRooms.map((room) => room.id));
+      return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...savedRooms];
     } catch {
       return initialRooms;
     }
@@ -404,10 +407,10 @@ function RoomDetail({ room, rooms, onBack, onOpen, isFavorite, onToggleFavorite,
                     {formatPrice(room.price)} <i>/ tháng</i>
                   </strong>
                 </div>
-                <div>
+                {room.size && <div>
                   <small>Diện tích</small>
                   <strong>{room.size}m²</strong>
-                </div>
+                </div>}
               </div>
               <div className="detail-block">
                 <h3>Về căn phòng</h3>
@@ -426,7 +429,7 @@ function RoomDetail({ room, rooms, onBack, onOpen, isFavorite, onToggleFavorite,
               </div>
               <div className="detail-block service-note">
                 <h3>Chi phí dịch vụ</h3>
-                <p>Liên hệ để được tư vấn chi tiết.</p>
+                {room.costs?.length ? <ul>{room.costs.map((cost) => <li key={cost}>{cost}</li>)}</ul> : <p>Liên hệ để được tư vấn chi tiết.</p>}
               </div>
               <RoomMap room={room} />
             </article>

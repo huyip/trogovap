@@ -1,9 +1,10 @@
 const image = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=82`
+const localRoomAsset = (filename) => `${import.meta.env.BASE_URL}rooms/${filename}`
 
 export const districts = [
   {
     name: 'Gò Vấp',
-    areas: ['Dương Quảng Hàm', 'Nguyễn Văn Lượng', 'Lê Đức Thọ', 'Phan Văn Trị', 'Quang Trung', 'Nguyễn Oanh', 'Khu Đại học Công nghiệp', 'Khu Emart', 'Các khu vực khác'],
+    areas: ['Dương Quảng Hàm', 'Nguyễn Văn Lượng', 'Lê Đức Thọ', 'Phan Văn Trị', 'Quang Trung', 'Nguyễn Oanh', 'Phạm Huy Thông', 'Khu Đại học Công nghiệp', 'Khu Emart', 'Các khu vực khác'],
   },
   { name: 'Quận 12', areas: ['Hà Huy Giáp', 'Nguyễn Ảnh Thủ', 'Lê Văn Khương', 'Tân Chánh Hiệp', 'Thạnh Lộc', 'Hiệp Thành', 'Trung Mỹ Tây'] },
 ]
@@ -21,4 +22,5 @@ export const rooms = [
   { id: 10, code: 'GV051', title: 'Phòng tối giản Nguyễn Văn Lượng', district: 'Gò Vấp', area: 'Nguyễn Văn Lượng', price: 3500000, size: 22, amenities: ['Máy lạnh', 'Cửa sổ', 'Giữ xe', 'Ra vào vân tay'], status: 'available', description: 'Không gian tối giản, sạch thoáng, dễ setup theo phong cách riêng. Gần nhiều tiện ích hàng ngày.', images: [image('photo-1513694203232-719a280e022f'), image('photo-1484101403633-562f891dc89a'), image('photo-1497366754035-f200968a6e72')] },
   { id: 11, code: 'GV058', title: 'Phòng rộng Phan Văn Trị', district: 'Gò Vấp', area: 'Phan Văn Trị', price: 6800000, size: 48, amenities: ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Ban công', 'Thang máy', 'Ra vào vân tay'], status: 'rented', description: 'Phòng rộng đã có người thuê.', images: [image('photo-1600607687939-ce8a6c25118c')] },
   { id: 12, code: 'GV063', title: 'Phòng sáng Quang Trung', district: 'Gò Vấp', area: 'Quang Trung', price: 2900000, size: 18, amenities: ['Cửa sổ', 'Giữ xe', 'Giờ giấc tự do'], status: 'available', description: 'Phòng gọn gàng cho ngân sách tiết kiệm, đón nắng buổi sáng.', images: [image('photo-1484154218962-a197022b5858'), image('photo-1505693416388-ac5ce068fe85')] },
+  { id: 13, code: 'PHT202', title: 'Phòng 1PN ban công Phạm Huy Thông', district: 'Gò Vấp', area: 'Phạm Huy Thông', address: '4 Phạm Huy Thông, Gò Vấp, Thành phố Hồ Chí Minh', price: 7700000, size: null, amenities: ['1 phòng ngủ', 'Ban công', 'Thang máy', 'Ra vào vân tay'], status: 'available', description: 'Phòng một phòng ngủ có ban công, trống sẵn tại số 4 Phạm Huy Thông.', costs: ['Điện: 4.000đ/kWh', 'Nước: 120.000đ/người', 'Dịch vụ: 150.000đ/phòng'], images: [2, 3, 4, 5, 6, 7, 8, 9].map((number) => localRoomAsset(`phong-202-${number}.jpg.jfif`)), video: localRoomAsset('phong-202-1.mp4.mp4') },
 ]

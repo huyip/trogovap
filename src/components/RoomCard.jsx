@@ -13,7 +13,7 @@ export default function RoomCard({ room, onOpen, isFavorite, onToggleFavorite, i
       <div className="room-meta"><span><MapPin size={14} />{room.area}</span><span>{room.district}</span></div>
       <h3>{room.title}</h3>
       <div className="room-price">{formatPrice(room.price)} <small>/ tháng</small></div>
-      <div className="room-size"><Ruler size={15} /> {room.size}m² <span className="dot-separator">•</span> {room.amenities.slice(0, 2).join(' • ')}</div>
+      <div className="room-size">{room.size && <><Ruler size={15} /> {room.size}m² <span className="dot-separator">•</span></>}{room.amenities.slice(0, 2).join(' • ')}</div>
       <div className="room-card-actions"><button className={`compare-button ${isCompared ? 'selected' : ''}`} onClick={() => onToggleCompare(room)}>{isCompared ? 'Đã chọn' : 'So sánh'}</button><button className="text-button" onClick={() => onOpen(room)}>Xem phòng <ArrowUpRight size={17} /></button></div>
     </div>
   </article>
