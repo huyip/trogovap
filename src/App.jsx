@@ -46,6 +46,10 @@ export default function App() {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, title: "Duplex - Phan Văn Trị", images: currentListing.images };
         }
+        if (room.code === "DQH080") {
+          const currentListing = initialRooms.find((item) => item.code === room.code);
+          return { ...room, ...currentListing };
+        }
         return room;
       });
       return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...updatedSavedRooms];
@@ -440,6 +444,10 @@ function RoomDetail({ room, rooms, onBack, onOpen, isFavorite, onToggleFavorite,
                 <h3>Chi phí dịch vụ</h3>
                 {room.costs?.length ? <ul>{room.costs.map((cost) => <li key={cost}>{cost}</li>)}</ul> : <p>Liên hệ để được tư vấn chi tiết.</p>}
               </div>
+              {room.rules?.length > 0 && <div className="detail-block service-note">
+                <h3>Quy định lưu trú</h3>
+                <ul>{room.rules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
+              </div>}
               <RoomMap room={room} />
             </article>
             <aside className="contact-card">
