@@ -42,7 +42,10 @@ export default function App() {
       const updatedSavedRooms = savedRooms.map((room) => {
         if (room.code === "PHT202") return { ...room, title: "Studio - Ban công - Phạm Huy Thông" };
         if (room.code === "LDTHO503") return { ...room, title: "Duplex - Lê Đức Thọ" };
-        if (room.code === "PVTRI307") return { ...room, title: "Duplex - Phan Văn Trị" };
+        if (room.code === "PVTRI307") {
+          const currentListing = initialRooms.find((item) => item.code === room.code);
+          return { ...room, title: "Duplex - Phan Văn Trị", images: currentListing.images };
+        }
         return room;
       });
       return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...updatedSavedRooms];
