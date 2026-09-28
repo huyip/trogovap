@@ -23,7 +23,7 @@ import { filterRooms, formatPrice, getSimilarRooms, sortRooms } from "./utils/ro
 
 const defaultFilters = {
   query: "",
-  district: "Gò Vấp",
+  district: "",
   area: "",
   price: "",
   size: "",
