@@ -19,7 +19,7 @@ import SearchPanel from "./components/SearchPanel";
 import RoomCompare from "./components/RoomCompare";
 import AdminPage from "./components/AdminPage";
 import { contactConfig } from "./config/contact";
-import { districts, rooms as initialRooms } from "./data/rooms";
+import { districts, rooms as initialRooms, removedDemoCodes } from "./data/rooms";
 import { filterRooms, formatPrice, getSimilarRooms, sortRooms } from "./utils/room";
 
 const defaultFilters = {
@@ -40,7 +40,7 @@ export default function App() {
       const savedRooms = JSON.parse(localStorage.getItem("ogovap-rooms"));
       if (!Array.isArray(savedRooms)) return initialRooms;
       const savedIds = new Set(savedRooms.map((room) => room.id));
-      const updatedSavedRooms = savedRooms.map((room) => {
+      const updatedSavedRooms = savedRooms.filter((room) => !removedDemoCodes.has(room.code)).map((room) => {
         if (room.code === "PHT202") return { ...room, title: "Studio - Ban công - Phạm Huy Thông" };
         if (room.code === "LDTHO503") return { ...room, title: "Duplex - Lê Đức Thọ" };
         if (room.code === "PVTRI307") {
