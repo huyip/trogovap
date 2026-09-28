@@ -39,7 +39,10 @@ export default function App() {
       const savedRooms = JSON.parse(localStorage.getItem("ogovap-rooms"));
       if (!Array.isArray(savedRooms)) return initialRooms;
       const savedIds = new Set(savedRooms.map((room) => room.id));
-      return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...savedRooms];
+      const updatedSavedRooms = savedRooms.map((room) => room.code === "PHT202"
+        ? { ...room, title: "Studio - Ban công - Phạm Huy Thông" }
+        : room);
+      return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...updatedSavedRooms];
     } catch {
       return initialRooms;
     }
