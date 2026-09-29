@@ -67,6 +67,10 @@ export default function App() {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, ...currentListing };
         }
+        if (room.code === "NTS566" || room.code === "NTS566D") {
+          const currentListing = initialRooms.find((item) => item.code === room.code);
+          return { ...room, images: currentListing.images };
+        }
         return room;
       });
       return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...updatedSavedRooms].map((room) => ({ ...room, amenities: [...new Set([...(room.amenities || []), "Máy lạnh"])] }));
