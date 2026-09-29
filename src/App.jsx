@@ -67,9 +67,13 @@ export default function App() {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, ...currentListing };
         }
-        if (room.code === "NTS566" || room.code === "NTS566D") {
+        if (room.code === "NTS566" || room.code === "NTS566D" || room.code === "PVC102" || room.code === "TN050BC") {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, images: currentListing.images };
+        }
+        if (room.code === "TN050") {
+          const currentListing = initialRooms.find((item) => item.code === room.code);
+          return { ...room, images: currentListing.images, floors: currentListing.floors, price: currentListing.price };
         }
         return room;
       });
@@ -393,9 +397,12 @@ function RoomMap({ room }) {
 }
 
 function RoomDetail({ room, rooms, onBack, onOpen, isFavorite, onToggleFavorite, onShare }) {
+  const [floorSelection, setFloorSelection] = useState(null);
+  const selectedFloor = room.floors?.find((floor) => floorSelection?.roomId === room.id && floor.level === floorSelection.level) || room.floors?.[0];
+  const displayedPrice = selectedFloor?.price ?? room.price;
   const message = contactConfig.defaultMessage
     .replace("{code}", room.code)
-    .replace("{area}", room.area);
+    .replace("{area}", room.area) + (selectedFloor ? ` - Lầu ${selectedFloor.level}` : "");
   const similar = getSimilarRooms(rooms, room);
   return (
     <>
@@ -435,7 +442,7 @@ function RoomDetail({ room, rooms, onBack, onOpen, isFavorite, onToggleFavorite,
                 <div>
                   <small>Giá thuê</small>
                   <strong>
-                    {formatPrice(room.price)} <i>/ tháng</i>
+                    {formatPrice(displayedPrice)} {displayedPrice != null && <i>/ tháng</i>}
                   </strong>
                 </div>
                 {room.size && <div>
@@ -443,6 +450,15 @@ function RoomDetail({ room, rooms, onBack, onOpen, isFavorite, onToggleFavorite,
                   <strong>{room.size}m²</strong>
                 </div>}
               </div>
+              {room.floors?.length > 0 && <fieldset className="floor-selector">
+                <legend>Chọn lầu</legend>
+                <div className="floor-options">
+                  {room.floors.map((floor) => <label key={floor.level} className={selectedFloor?.level === floor.level ? "is-selected" : ""}>
+                    <input type="radio" name={`floor-${room.id}`} value={floor.level} checked={selectedFloor?.level === floor.level} onChange={() => setFloorSelection({ roomId: room.id, level: floor.level })} />
+                    <span>Lầu {floor.level}</span>
+                  </label>)}
+                </div>
+              </fieldset>}
               <div className="detail-block">
                 <h3>Về căn phòng</h3>
                 <p>{room.description}</p>
