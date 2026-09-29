@@ -67,7 +67,7 @@ export default function App() {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, ...currentListing };
         }
-        if (room.code === "NTS566" || room.code === "NTS566D" || room.code === "PVC102" || room.code === "TN050BC" || room.code === "TN050D73") {
+        if (room.code === "NTS566" || room.code === "NTS566D" || room.code === "PVC102" || room.code === "TN050BC" || room.code === "TN050D73" || room.code === "DQH496" || room.code === "DQH496L4") {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, images: currentListing.images };
         }
