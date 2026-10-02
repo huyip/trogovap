@@ -85,6 +85,7 @@ export default function App() {
   const [filters, setFilters] = useState(defaultFilters);
   const [sortBy, setSortBy] = useState("newest");
   const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem("ogovap-favorites") || "[]"));
+  const [showFavorites, setShowFavorites] = useState(false);
   const [compareIds, setCompareIds] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [admin, setAdmin] = useState(window.location.pathname === "/admin");
@@ -148,6 +149,8 @@ export default function App() {
       sortBy={sortBy}
       setSortBy={setSortBy}
       favorites={favorites}
+      showFavorites={showFavorites}
+      setShowFavorites={setShowFavorites}
       compareIds={compareIds}
       compareRooms={compareRooms}
       onClearCompare={() => setCompareIds([])}
@@ -164,11 +167,13 @@ export default function App() {
   );
 }
 
-function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorites, compareIds, compareRooms, onClearCompare, onToggleFavorite, onToggleCompare, onOpen, onFindRooms, onAdmin }) {
+function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorites, showFavorites, setShowFavorites, compareIds, compareRooms, onClearCompare, onToggleFavorite, onToggleCompare, onOpen, onFindRooms, onAdmin }) {
   const [areaFocus, setAreaFocus] = useState("Gò Vấp");
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const areas = districts.find((item) => item.name === areaFocus)?.areas || [];
   const suggestedRooms = rooms.slice(0, 4);
+  const favoriteRooms = favorites.map((id) => allRooms.find((room) => room.id === id)).filter(Boolean);
+  const displayedRooms = showFavorites ? favoriteRooms : rooms;
   const chooseArea = (area) => {
     setFilters((current) => ({ ...current, district: areaFocus, area }));
     onFindRooms();
@@ -186,7 +191,15 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
   }, [suggestedRooms.length]);
   return (
     <>
-      <Header onFindRooms={onFindRooms} />
+      <Header
+        onFindRooms={onFindRooms}
+        showFavorites={showFavorites}
+        favoriteCount={favoriteRooms.length}
+        onShowFavorites={() => {
+          setShowFavorites((current) => !current);
+          window.requestAnimationFrame(() => document.getElementById("rooms")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+        }}
+      />
       <main id="top">
         <section className="hero">
           <div className="hero-grid container">
@@ -284,7 +297,7 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
             <div>
               <div className="section-kicker">
                 <span>02</span>
-                <span>Phòng đang chờ bạn</span>
+                <span>{showFavorites ? "Phòng yêu thích" : "Phòng đang chờ bạn"}</span>
               </div>
               <h2>
                 Chọn một căn
@@ -292,16 +305,16 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
                 <em>vừa ý.</em>
               </h2>
             </div>
-            <span className="result-total">{rooms.length} kết quả</span>
+            <span className="result-total">{displayedRooms.length} kết quả</span>
           </div>
-          {rooms.length ? (
+          {displayedRooms.length ? (
             <div className="room-grid">
-              {rooms.map((room) => (
+              {displayedRooms.map((room) => (
                 <RoomCard key={room.id} room={room} onOpen={onOpen} isFavorite={favorites.includes(room.id)} onToggleFavorite={onToggleFavorite} isCompared={compareIds.includes(room.id)} onToggleCompare={onToggleCompare} />
               ))}
             </div>
           ) : (
-            <EmptyState />
+            <EmptyState showingFavorites={showFavorites} onShowAll={() => setShowFavorites(false)} />
           )}
           <RoomCompare rooms={compareRooms} allRooms={allRooms} onToggle={onToggleCompare} onClear={onClearCompare} onOpen={onOpen} />
         </section>
@@ -354,12 +367,13 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
 }
 
 
-function EmptyState() {
+function EmptyState({ showingFavorites, onShowAll }) {
   return (
     <div className="empty-state">
       <div className="empty-icon">⌂</div>
-      <h3>Chưa tìm thấy phòng phù hợp.</h3>
-      <p>Thử nới rộng bộ lọc hoặc nhắn để mình tìm giúp bạn.</p>
+      <h3>{showingFavorites ? "Bạn chưa lưu phòng yêu thích nào." : "Chưa tìm thấy phòng phù hợp."}</h3>
+      <p>{showingFavorites ? "Chạm vào biểu tượng trái tim trên phòng để lưu lại xem sau." : "Thử nới rộng bộ lọc hoặc nhắn để mình tìm giúp bạn."}</p>
+      {showingFavorites && <button className="text-button" onClick={onShowAll}>Xem tất cả phòng <ArrowUpRight size={16} /></button>}
     </div>
   );
 }
