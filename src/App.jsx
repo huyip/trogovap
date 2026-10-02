@@ -76,6 +76,10 @@ export default function App() {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, images: currentListing.images, floors: currentListing.floors, price: currentListing.price };
         }
+        if (room.code === "VL120") {
+          const currentListing = initialRooms.find((item) => item.code === room.code);
+          return { ...room, images: currentListing.images, video: currentListing.video };
+        }
         return room;
       });
       return [...initialRooms.filter((room) => !savedIds.has(room.id)), ...updatedSavedRooms].map((room) => ({ ...room, amenities: [...new Set([...(room.amenities || []), "Máy lạnh"])] }));
