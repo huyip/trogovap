@@ -16,6 +16,7 @@ import Header from "./components/Header";
 import RoomCard from "./components/RoomCard";
 import Gallery from "./components/Gallery";
 import SearchPanel from "./components/SearchPanel";
+import FavoritesPage from "./components/FavoritesPage";
 import RoomCompare from "./components/RoomCompare";
 import AdminPage from "./components/AdminPage";
 import { contactConfig } from "./config/contact";
@@ -85,10 +86,10 @@ export default function App() {
   const [filters, setFilters] = useState(defaultFilters);
   const [sortBy, setSortBy] = useState("newest");
   const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem("ogovap-favorites") || "[]"));
-  const [showFavorites, setShowFavorites] = useState(false);
+  const [favoritesPage, setFavoritesPage] = useState(() => window.location.pathname.replace(/\/+$/, "").endsWith("/yeu-thich"));
   const [compareIds, setCompareIds] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [admin, setAdmin] = useState(window.location.pathname === "/admin");
+  const [admin, setAdmin] = useState(() => window.location.pathname.replace(/\/+$/, "").endsWith("/admin"));
   const [returnScrollY, setReturnScrollY] = useState(0);
   useEffect(
     () => localStorage.setItem("ogovap-rooms", JSON.stringify(rooms)),
@@ -96,23 +97,31 @@ export default function App() {
   );
   useEffect(() => localStorage.setItem("ogovap-favorites", JSON.stringify(favorites)), [favorites]);
   useEffect(() => {
-    const roomCode = window.location.pathname.match(/\/phong\/([^/]+)/)?.[1];
-    if (roomCode) {
-      const room = rooms.find((item) => item.code === roomCode);
-      if (room) setSelectedRoom(room);
-    }
+    const syncRoute = () => {
+      const path = window.location.pathname.replace(/\/+$/, "");
+      const roomCode = path.match(/\/phong\/([^/]+)$/)?.[1];
+      setSelectedRoom(roomCode ? rooms.find((room) => room.code === roomCode) || null : null);
+      setAdmin(path.endsWith("/admin"));
+      setFavoritesPage(path.endsWith("/yeu-thich"));
+    };
+    syncRoute();
+    window.addEventListener("popstate", syncRoute);
+    return () => window.removeEventListener("popstate", syncRoute);
   }, [rooms]);
   useEffect(() => {
     document.title = selectedRoom
       ? `${selectedRoom.code} | Ở Gò Vấp`
       : admin
         ? "Quản trị | Ở Gò Vấp"
+        : favoritesPage
+          ? "Phòng yêu thích | Ở Gò Vấp"
         : "Ở Gò Vấp | Tìm phòng trọ dễ hơn";
-  }, [selectedRoom, admin]);
+  }, [selectedRoom, admin, favoritesPage]);
   const filteredRooms = sortRooms(filterRooms(rooms, filters), sortBy);
   const toggleFavorite = (id) => setFavorites((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   const toggleCompare = (room) => setCompareIds((current) => current.includes(room.id) ? current.filter((id) => id !== room.id) : current.length >= 3 ? current : [...current, room.id]);
   const compareRooms = rooms.filter((room) => compareIds.includes(room.id));
+  const favoriteRooms = favorites.map((id) => rooms.find((room) => room.id === id)).filter(Boolean);
   const shareRoom = async (room) => {
     const url = window.location.href;
     if (navigator.share) await navigator.share({ title: room.title, text: `${room.title} · ${formatPrice(room.price)}/tháng`, url });
@@ -128,12 +137,25 @@ export default function App() {
     const previousScrollY = returnScrollY;
     setSelectedRoom(null);
     setAdmin(false);
-    window.history.pushState({}, "", appPath());
+    window.history.pushState({}, "", favoritesPage ? appPath("yeu-thich") : appPath());
     window.requestAnimationFrame(() => window.scrollTo({ top: previousScrollY }));
+  };
+  const goFavorites = () => {
+    setSelectedRoom(null);
+    setAdmin(false);
+    setFavoritesPage(true);
+    window.history.pushState({}, "", appPath("yeu-thich"));
+    window.scrollTo({ top: 0 });
+  };
+  const backFromFavorites = () => {
+    setFavoritesPage(false);
+    window.history.pushState({}, "", appPath());
+    window.scrollTo({ top: 0 });
   };
   const goAdmin = () => {
     setAdmin(true);
     setSelectedRoom(null);
+    setFavoritesPage(false);
     window.history.pushState({}, "", appPath("admin"));
     window.scrollTo({ top: 0 });
   };
@@ -141,6 +163,8 @@ export default function App() {
     return <AdminPage rooms={rooms} setRooms={setRooms} onBack={backHome} />;
   if (selectedRoom)
     return <RoomDetail room={selectedRoom} rooms={rooms} onBack={backHome} onOpen={openRoom} isFavorite={favorites.includes(selectedRoom.id)} onToggleFavorite={toggleFavorite} onShare={shareRoom} />;
+  if (favoritesPage)
+    return <FavoritesPage rooms={favoriteRooms} favorites={favorites} onBack={backFromFavorites} onOpen={openRoom} onToggleFavorite={toggleFavorite} compareIds={compareIds} onToggleCompare={toggleCompare} />;
   return (
     <Home
       rooms={filteredRooms} allRooms={rooms}
@@ -149,14 +173,13 @@ export default function App() {
       sortBy={sortBy}
       setSortBy={setSortBy}
       favorites={favorites}
-      showFavorites={showFavorites}
-      setShowFavorites={setShowFavorites}
       compareIds={compareIds}
       compareRooms={compareRooms}
       onClearCompare={() => setCompareIds([])}
       onToggleFavorite={toggleFavorite}
       onToggleCompare={toggleCompare}
       onOpen={openRoom}
+      onShowFavorites={goFavorites}
       onFindRooms={() =>
         document
           .getElementById("find-rooms")
@@ -167,13 +190,11 @@ export default function App() {
   );
 }
 
-function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorites, showFavorites, setShowFavorites, compareIds, compareRooms, onClearCompare, onToggleFavorite, onToggleCompare, onOpen, onFindRooms, onAdmin }) {
+function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorites, compareIds, compareRooms, onClearCompare, onToggleFavorite, onToggleCompare, onOpen, onFindRooms, onShowFavorites, onAdmin }) {
   const [areaFocus, setAreaFocus] = useState("Gò Vấp");
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const areas = districts.find((item) => item.name === areaFocus)?.areas || [];
   const suggestedRooms = rooms.slice(0, 4);
-  const favoriteRooms = favorites.map((id) => allRooms.find((room) => room.id === id)).filter(Boolean);
-  const displayedRooms = showFavorites ? favoriteRooms : rooms;
   const chooseArea = (area) => {
     setFilters((current) => ({ ...current, district: areaFocus, area }));
     onFindRooms();
@@ -193,12 +214,8 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
     <>
       <Header
         onFindRooms={onFindRooms}
-        showFavorites={showFavorites}
-        favoriteCount={favoriteRooms.length}
-        onShowFavorites={() => {
-          setShowFavorites((current) => !current);
-          window.requestAnimationFrame(() => document.getElementById("rooms")?.scrollIntoView({ behavior: "smooth", block: "start" }));
-        }}
+        favoriteCount={favorites.length}
+        onShowFavorites={onShowFavorites}
       />
       <main id="top">
         <section className="hero">
@@ -297,7 +314,7 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
             <div>
               <div className="section-kicker">
                 <span>02</span>
-                <span>{showFavorites ? "Phòng yêu thích" : "Phòng đang chờ bạn"}</span>
+                <span>Phòng đang chờ bạn</span>
               </div>
               <h2>
                 Chọn một căn
@@ -305,16 +322,16 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
                 <em>vừa ý.</em>
               </h2>
             </div>
-            <span className="result-total">{displayedRooms.length} kết quả</span>
+            <span className="result-total">{rooms.length} kết quả</span>
           </div>
-          {displayedRooms.length ? (
+          {rooms.length ? (
             <div className="room-grid">
-              {displayedRooms.map((room) => (
+              {rooms.map((room) => (
                 <RoomCard key={room.id} room={room} onOpen={onOpen} isFavorite={favorites.includes(room.id)} onToggleFavorite={onToggleFavorite} isCompared={compareIds.includes(room.id)} onToggleCompare={onToggleCompare} />
               ))}
             </div>
           ) : (
-            <EmptyState showingFavorites={showFavorites} onShowAll={() => setShowFavorites(false)} />
+            <EmptyState />
           )}
           <RoomCompare rooms={compareRooms} allRooms={allRooms} onToggle={onToggleCompare} onClear={onClearCompare} onOpen={onOpen} />
         </section>
@@ -367,13 +384,12 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
 }
 
 
-function EmptyState({ showingFavorites, onShowAll }) {
+function EmptyState() {
   return (
     <div className="empty-state">
       <div className="empty-icon">⌂</div>
-      <h3>{showingFavorites ? "Bạn chưa lưu phòng yêu thích nào." : "Chưa tìm thấy phòng phù hợp."}</h3>
-      <p>{showingFavorites ? "Chạm vào biểu tượng trái tim trên phòng để lưu lại xem sau." : "Thử nới rộng bộ lọc hoặc nhắn để mình tìm giúp bạn."}</p>
-      {showingFavorites && <button className="text-button" onClick={onShowAll}>Xem tất cả phòng <ArrowUpRight size={16} /></button>}
+      <h3>Chưa tìm thấy phòng phù hợp.</h3>
+      <p>Thử nới rộng bộ lọc hoặc nhắn để mình tìm giúp bạn.</p>
     </div>
   );
 }
