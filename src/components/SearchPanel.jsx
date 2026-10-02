@@ -29,6 +29,7 @@ export default function SearchPanel({ filters, setFilters, count, sortBy, setSor
     .filter((price) => Number.isFinite(price) && price > 0)
     .map((price) => Math.floor(price / 1000000)))].sort((a, b) => a - b)
     .map((million) => [`${million}to${million + 1}`, `${million}xxx`])
+  quickPrices.unshift(['all', 'Tất cả'])
   return <section className="search-shell" id="find-rooms">
     <div className="search-row">
       <label className="search-input"><Search size={19} /><input aria-label="Tìm kiếm phòng" value={filters.query} onChange={(event) => update('query', event.target.value)} placeholder="Tìm theo khu vực..." /></label>
@@ -39,7 +40,10 @@ export default function SearchPanel({ filters, setFilters, count, sortBy, setSor
     </div>
     <div className="quick-price-filter" aria-label="Lọc nhanh theo mức giá">
       <strong>Mức giá:</strong>
-      {quickPrices.map(([value, label]) => <button key={value} type="button" aria-pressed={filters.price === value} className={filters.price === value ? 'selected' : ''} onClick={() => update('price', filters.price === value ? '' : value)}>{label}</button>)}
+      {quickPrices.map(([value, label]) => {
+        const selected = value === 'all' ? !filters.price : filters.price === value
+        return <button key={value} type="button" aria-pressed={selected} className={selected ? 'selected' : ''} onClick={() => update('price', value === 'all' || filters.price === value ? '' : value)}>{label}</button>
+      })}
     </div>
     {locationOpen && <div className="location-picker"><div className="location-picker-header"><button className="location-back" onClick={() => { setLocationOpen(false); setLocationQuery('') }}><ArrowLeft size={19} /></button><strong>{locationMode === 'district' ? 'Chọn quận' : `Chọn khu vực${selectedDistrict ? ` · ${selectedDistrict.name}` : ''}`}</strong></div><label className="location-search"><Search size={17} /><input autoFocus value={locationQuery} onChange={(event) => setLocationQuery(event.target.value)} placeholder={locationMode === 'district' ? 'Nhập tên quận' : 'Nhập tên khu vực'} /></label><div className="location-list">{locationMode === 'district' ? <><button className="location-option district-option" onClick={() => chooseDistrict('')}><span>Tất cả quận</span><small>{districts.length} quận</small></button>{visibleDistricts.map((item) => <button className="location-option district-option" key={item.name} onClick={() => chooseDistrict(item.name)}><span>{item.name}</span><small>Quận</small></button>)}</> : <><button className="location-option" onClick={() => chooseArea('', filters.district)}><span>Tất cả khu vực</span><small>{selectedDistrict ? `${selectedDistrict.areas.length} khu vực` : 'Mọi khu vực'}</small></button>{visibleAreas.map(({ area, district }) => <button className="location-option" key={`${district}-${area}`} onClick={() => chooseArea(area, district)}><span>{area}</span><small>{district}</small></button>)}</>}{((locationMode === 'district' && !visibleDistricts.length) || (locationMode === 'area' && !visibleAreas.length)) && <p className="location-empty">Không tìm thấy khu vực phù hợp.</p>}</div></div>}
     {advanced && <div className="advanced-filters">
