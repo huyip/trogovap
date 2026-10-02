@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { districts } from '../data/rooms'
 
 const prices = [['under3', 'Dưới 3 triệu'], ['3to4', '3–4 triệu'], ['4to5', '4–5 triệu'], ['5to6', '5–6 triệu'], ['over6', 'Trên 6 triệu']]
+const quickPrices = [['3to4', '3xxx'], ['4to5', '4xxx'], ['5to6', '5xxx'], ['6to7', '6xxx'], ['7to8', '7xxx']]
 const sizes = [['under20', 'Dưới 20m²'], ['20to30', '20–30m²'], ['30to40', '30–40m²'], ['over40', 'Trên 40m²']]
 const amenities = ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Máy giặt', 'Máy giặt riêng', 'Ban công', 'Cửa sổ', '2 cửa sổ', 'Thoáng mát', 'Sân thượng phơi đồ', 'Thang máy', 'Giữ xe', 'Gửi xe miễn phí', 'Hầm xe', 'Có bảo vệ', 'Giường', 'Nệm', 'Tủ quần áo', 'Kệ bếp', 'Máy hút mùi', 'Bàn ghế', 'Giờ giấc tự do', 'Ra vào vân tay']
 
@@ -30,6 +31,10 @@ export default function SearchPanel({ filters, setFilters, count, sortBy, setSor
       <button className="select-field area-select" type="button" onClick={() => openLocation('area')}><span>Khu vực</span><strong>{filters.area || 'Chọn khu vực'}</strong><ChevronDown size={16} /></button>
       <button className="button button-accent search-submit" type="button" onClick={() => document.getElementById('rooms')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>TÌM</button>
       <button className="button button-accent filter-toggle" onClick={() => setAdvanced(!advanced)}><SlidersHorizontal size={17} /> Bộ lọc <span className="filter-count">{filters.amenities.length + Number(Boolean(filters.price)) + Number(Boolean(filters.size))}</span></button>
+    </div>
+    <div className="quick-price-filter" aria-label="Lọc nhanh theo mức giá">
+      <strong>Mức giá:</strong>
+      {quickPrices.map(([value, label]) => <button key={value} type="button" aria-pressed={filters.price === value} className={filters.price === value ? 'selected' : ''} onClick={() => update('price', filters.price === value ? '' : value)}>{label}</button>)}
     </div>
     {locationOpen && <div className="location-picker"><div className="location-picker-header"><button className="location-back" onClick={() => { setLocationOpen(false); setLocationQuery('') }}><ArrowLeft size={19} /></button><strong>{locationMode === 'district' ? 'Chọn quận' : `Chọn khu vực${selectedDistrict ? ` · ${selectedDistrict.name}` : ''}`}</strong></div><label className="location-search"><Search size={17} /><input autoFocus value={locationQuery} onChange={(event) => setLocationQuery(event.target.value)} placeholder={locationMode === 'district' ? 'Nhập tên quận' : 'Nhập tên khu vực'} /></label><div className="location-list">{locationMode === 'district' ? <><button className="location-option district-option" onClick={() => chooseDistrict('')}><span>Tất cả quận</span><small>{districts.length} quận</small></button>{visibleDistricts.map((item) => <button className="location-option district-option" key={item.name} onClick={() => chooseDistrict(item.name)}><span>{item.name}</span><small>Quận</small></button>)}</> : <><button className="location-option" onClick={() => chooseArea('', filters.district)}><span>Tất cả khu vực</span><small>{selectedDistrict ? `${selectedDistrict.areas.length} khu vực` : 'Mọi khu vực'}</small></button>{visibleAreas.map(({ area, district }) => <button className="location-option" key={`${district}-${area}`} onClick={() => chooseArea(area, district)}><span>{area}</span><small>{district}</small></button>)}</>}{((locationMode === 'district' && !visibleDistricts.length) || (locationMode === 'area' && !visibleAreas.length)) && <p className="location-empty">Không tìm thấy khu vực phù hợp.</p>}</div></div>}
     {advanced && <div className="advanced-filters">
