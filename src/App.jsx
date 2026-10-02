@@ -270,7 +270,7 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
                     key={room.id}
                     onClick={goToRooms}
                   >
-                    <img src={room.images[0]} alt={room.title} />
+                    {room.images?.[0] ? <img src={room.images[0]} alt={room.title} /> : <span className="suggestion-image-placeholder">Ảnh phòng sẽ được cập nhật</span>}
                     <div className="suggestion-overlay">
                       <span>{room.area}</span>
                       <strong>{room.title}</strong>

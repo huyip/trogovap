@@ -77,14 +77,17 @@ export default function Gallery({ room, onClose }) {
     setDragging(false)
   }
   return <div className="gallery">
-    <div className="gallery-main" ref={galleryRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+    <div className="gallery-main" ref={galleryRef} onTouchStart={media.length ? handleTouchStart : undefined} onTouchMove={media.length ? handleTouchMove : undefined} onTouchEnd={media.length ? handleTouchEnd : undefined}>
+      {!media.length && <div className="gallery-empty">Ảnh phòng sẽ được cập nhật</div>}
+      {media.length > 0 && <>
       <div className="gallery-track" style={{ transform: `translateX(calc(-${index * 100}% + ${dragOffset}px))`, transition: dragging ? 'none' : undefined }}>
         {media.map((item, mediaIndex) => item.type === 'video' ? <video key={item.src} src={item.src} controls playsInline preload="metadata" aria-label={`Video ${room.title}`} /> : <img key={item.src} className={mediaIndex === index && zoom > 1 ? 'is-zoomed' : ''} style={mediaIndex === index ? { transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` } : undefined} src={item.src} alt={`${room.title} - ảnh ${mediaIndex + 1}`} />)}
       </div>
-      <button className="gallery-close icon-button" onClick={onClose} aria-label="Đóng"><X size={20} /></button>
       {media.length > 1 && <><button className="gallery-arrow gallery-prev" onClick={() => move(-1)} aria-label="Ảnh trước"><ChevronLeft /></button><button className="gallery-arrow gallery-next" onClick={() => move(1)} aria-label="Ảnh tiếp"><ChevronRight /></button></>}
       <span className="gallery-counter">{index + 1} / {media.length}</span>
+      </>}
+      <button className="gallery-close icon-button" onClick={onClose} aria-label="Đóng"><X size={20} /></button>
     </div>
-    <div className="gallery-thumbs">{media.map((item, thumbIndex) => <button key={item.src} className={thumbIndex === index ? 'active' : ''} onClick={() => { setIndex(thumbIndex); setZoom(1); setPan({ x: 0, y: 0 }) }}>{item.type === 'video' ? <><video src={item.src} muted preload="metadata" /><Play className="video-thumb-play" size={20} /></> : <img src={item.src} alt="" loading="lazy" />}</button>)}</div>
+    {media.length > 0 && <div className="gallery-thumbs">{media.map((item, thumbIndex) => <button key={item.src} className={thumbIndex === index ? 'active' : ''} onClick={() => { setIndex(thumbIndex); setZoom(1); setPan({ x: 0, y: 0 }) }}>{item.type === 'video' ? <><video src={item.src} muted preload="metadata" /><Play className="video-thumb-play" size={20} /></> : <img src={item.src} alt="" loading="lazy" />}</button>)}</div>}
   </div>
 }
