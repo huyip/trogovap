@@ -3,11 +3,10 @@ import { useState } from 'react'
 import { districts } from '../data/rooms'
 
 const prices = [['under3', 'Dưới 3 triệu'], ['3to4', '3–4 triệu'], ['4to5', '4–5 triệu'], ['5to6', '5–6 triệu'], ['over6', 'Trên 6 triệu']]
-const quickPrices = [['3to4', '3xxx'], ['4to5', '4xxx'], ['5to6', '5xxx'], ['6to7', '6xxx'], ['7to8', '7xxx']]
 const sizes = [['under20', 'Dưới 20m²'], ['20to30', '20–30m²'], ['30to40', '30–40m²'], ['over40', 'Trên 40m²']]
 const amenities = ['Có gác', 'Máy lạnh', 'Tủ lạnh', 'Máy giặt', 'Máy giặt riêng', 'Ban công', 'Cửa sổ', '2 cửa sổ', 'Thoáng mát', 'Sân thượng phơi đồ', 'Thang máy', 'Giữ xe', 'Gửi xe miễn phí', 'Hầm xe', 'Có bảo vệ', 'Giường', 'Nệm', 'Tủ quần áo', 'Kệ bếp', 'Máy hút mùi', 'Bàn ghế', 'Giờ giấc tự do', 'Ra vào vân tay']
 
-export default function SearchPanel({ filters, setFilters, count, sortBy, setSortBy }) {
+export default function SearchPanel({ filters, setFilters, count, sortBy, setSortBy, priceRooms = [] }) {
   const [advanced, setAdvanced] = useState(false)
   const [locationOpen, setLocationOpen] = useState(false)
   const [locationMode, setLocationMode] = useState('district')
@@ -24,6 +23,12 @@ export default function SearchPanel({ filters, setFilters, count, sortBy, setSor
     ? selectedDistrict.areas.map((area) => ({ area, district: selectedDistrict.name }))
     : districts.flatMap((district) => district.areas.map((area) => ({ area, district: district.name })))
   const visibleAreas = availableAreas.filter(({ area, district }) => !locationQuery || `${area} ${district}`.toLowerCase().includes(locationQuery.toLowerCase()))
+  const quickPrices = [...new Set(priceRooms
+    .filter((room) => room.status !== 'rented')
+    .flatMap((room) => [room.price, ...(room.floors || []).map((floor) => floor.price)])
+    .filter((price) => Number.isFinite(price) && price > 0)
+    .map((price) => Math.floor(price / 1000000)))].sort((a, b) => a - b)
+    .map((million) => [`${million}to${million + 1}`, `${million}xxx`])
   return <section className="search-shell" id="find-rooms">
     <div className="search-row">
       <label className="search-input"><Search size={19} /><input aria-label="Tìm kiếm phòng" value={filters.query} onChange={(event) => update('query', event.target.value)} placeholder="Tìm theo khu vực..." /></label>

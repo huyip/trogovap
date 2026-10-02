@@ -274,6 +274,7 @@ function Home({ rooms, allRooms, filters, setFilters, sortBy, setSortBy, favorit
             filters={filters}
             setFilters={setFilters}
             count={rooms.length}
+            priceRooms={allRooms}
             sortBy={sortBy}
             setSortBy={setSortBy}
           />
