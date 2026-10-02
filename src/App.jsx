@@ -68,6 +68,10 @@ export default function App() {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, images: currentListing.images, video: currentListing.video };
         }
+        if (room.code === "LDT145P201") {
+          const currentListing = initialRooms.find((item) => item.code === room.code);
+          return { ...room, images: currentListing.images, video: currentListing.video };
+        }
         if (room.code === "LVT401") {
           const currentListing = initialRooms.find((item) => item.code === room.code);
           return { ...room, ...currentListing };
